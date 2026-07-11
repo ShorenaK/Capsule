@@ -31,9 +31,9 @@ router.get("/capsules", (req, res) => {
 
 router.post("/capsules", (req, res) => {
     console.log("POST /api/capsules called");
-    const { name, description, members } = req.body;
+    const { name, description } = req.body;
 
-    if (!name || !description || !members) {
+    if (!name || !description) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -41,7 +41,6 @@ router.post("/capsules", (req, res) => {
         id: capsules.length + 1,
         name,
         description,
-        members,
     };
 
     capsules.push(newCapsule);

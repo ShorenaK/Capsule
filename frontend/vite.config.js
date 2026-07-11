@@ -7,8 +7,6 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Forward API calls to the Express backend so the frontend can use
-      // relative "/api/..." URLs in both dev and production.
       '/api': 'http://localhost:3000',
     },
   },
