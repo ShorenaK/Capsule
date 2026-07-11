@@ -1,36 +1,38 @@
-import bcrypt from "bcrypt";
-
-let users = [
-  {
-    id: 1,
-    name: "Alice",
-    email: "alice@example.com",
-    // bcrypt hash of "password123"
-    passwordHash: bcrypt.hashSync("password123", 10),
-  },
-];
+import { ObjectId } from "mongodb";
+import { usersCollection } from "../config/db.js";
 
 const normalizeEmail = (email) => email.trim().toLowerCase();
 
-export const createUser = (user) => {
-  const newUser = {
-    id: users.length + 1,
-    ...user,
+const toPlain = (doc) => {
+  if (!doc) return null;
+  return { ...doc, id: doc._id.toString() };
+};
+
+export const createUser = async (user) => {
+  const doc = {
+    name: user.name,
     email: normalizeEmail(user.email),
+    passwordHash: user.passwordHash,
+    createdAt: new Date(),
   };
-  users.push(newUser);
-  return { ...newUser };
+  const result = await usersCollection().insertOne(doc);
+  return toPlain({ ...doc, _id: result.insertedId });
 };
 
-export const findUserByEmail = (email) => {
-  const normalized = normalizeEmail(email);
-  return users.find((user) => user.email === normalized);
+export const findUserByEmail = async (email) => {
+  const user = await usersCollection().findOne({
+    email: normalizeEmail(email),
+  });
+  return toPlain(user);
 };
 
-export const findUserById = (id) => {
-  return users.find((user) => user.id === id);
+export const findUserById = async (id) => {
+  if (!ObjectId.isValid(id)) return null;
+  const user = await usersCollection().findOne({ _id: new ObjectId(id) });
+  return toPlain(user);
 };
 
-export const getAllUsers = () => {
-  return users;
+export const getAllUsers = async () => {
+  const users = await usersCollection().find().toArray();
+  return users.map(toPlain);
 };

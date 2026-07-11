@@ -1,8 +1,10 @@
+import "dotenv/config";
 import express from "express";
 import passport from "./config/passport.js";
 import session from "express-session";
 import auth from "./routes/Auth.js";
 
+import { connectDB } from "./config/db.js";
 import capsuleRoutes from "./routes/Capsule.js";
 
 const app = express();
@@ -33,6 +35,13 @@ app.use("/api/auth", auth);
 
 app.use("/", express.static("frontend/dist"));
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to connect to MongoDB:", err.message);
+    process.exit(1);
+  });
