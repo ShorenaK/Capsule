@@ -18,33 +18,33 @@ const capsules = [
 ];
 
 router.get("/capsules", (req, res) => {
-    console.log("GET /api/capsules called");
-    let query = req.query.q;
+  console.log("GET /api/capsules called");
+  let query = req.query.q;
 
-    if (query) {
-        query = query.toLowerCase();
-        return res.json(
-            capsules.filter((capsule) => capsule.name.toLowerCase().includes(query))
-        );
-    } else res.json(capsules);
+  if (query) {
+    query = query.toLowerCase();
+    return res.json(
+      capsules.filter((capsule) => capsule.name.toLowerCase().includes(query))
+    );
+  } else res.json(capsules);
 });
 
 router.post("/capsules", (req, res) => {
-    console.log("POST /api/capsules called");
-    const { name, description } = req.body;
+  console.log("POST /api/capsules called");
+  const { name, description } = req.body;
 
-    if (!name || !description) {
-        return res.status(400).json({ error: "Missing required fields" });
-    }
+  if (!name || !description) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
 
-    const newCapsule = {
-        id: capsules.length + 1,
-        name,
-        description,
-    };
+  const newCapsule = {
+    id: capsules.length + 1,
+    name,
+    description,
+  };
 
-    capsules.push(newCapsule);
-    res.status(201).json(newCapsule);
+  capsules.push(newCapsule);
+  res.status(201).json(newCapsule);
 });
 
 export default router;

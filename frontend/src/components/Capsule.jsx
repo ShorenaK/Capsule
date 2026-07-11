@@ -1,4 +1,6 @@
-export default function Capsule ({ capsule }) {
+import PropTypes from "prop-types";
+
+export default function Capsule({ capsule }) {
   return (
     <div className="capsule">
       <h2>{capsule.name}</h2>
@@ -7,3 +9,11 @@ export default function Capsule ({ capsule }) {
     </div>
   );
 }
+
+Capsule.propTypes = {
+  capsule: PropTypes.shape({
+    name: PropTypes.string,
+    description: PropTypes.string,
+    members: PropTypes.arrayOf(PropTypes.string),
+  }).isRequired,
+};

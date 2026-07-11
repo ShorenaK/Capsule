@@ -1,7 +1,9 @@
+import { useState } from "react";
+import PropTypes from "prop-types";
+
 import FloatingLabel from "react-bootstrap/FloatingLabel";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import { useState } from "react";
 
 export default function CapsuleForm({ onSubmit }) {
   const [name, setName] = useState("");
@@ -9,12 +11,11 @@ export default function CapsuleForm({ onSubmit }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting capsule:", { name, description });
     await onSubmit({ name, description });
     setName("");
     setDescription("");
   };
-  
+
   return (
     <Form onSubmit={handleSubmit}>
       <FloatingLabel controlId="name" label="Name">
@@ -36,4 +37,8 @@ export default function CapsuleForm({ onSubmit }) {
       <Button type="submit">Submit</Button>
     </Form>
   );
-}   
+}
+
+CapsuleForm.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};

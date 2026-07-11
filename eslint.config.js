@@ -1,11 +1,16 @@
 import globals from "globals";
 import js from "@eslint/js";
+import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
 import eslintConfigPrettier from "eslint-config-prettier";
 import prettier from "eslint-plugin-prettier";
 
 export default [
   {
-    files: ["**/*.{js,jsx,mjs,cjs,ts,tsx}"],
+    ignores: ["**/dist/**", "**/node_modules/**"],
+  },
+  {
+    files: ["**/*.{js,jsx,mjs,cjs}"],
 
     languageOptions: {
       ecmaVersion: "latest",
@@ -22,28 +27,35 @@ export default [
         ...globals.es2025,
       },
     },
+
+    settings: {
+      react: {
+        version: "18",
+      },
+    },
+
     plugins: {
-      prettier: prettier,
+      react,
+      "react-hooks": reactHooks,
+      prettier,
     },
 
     rules: {
       // ESLint recommended rules
       ...js.configs.recommended.rules,
 
-      indent: [
-        "error",
-        2,
-        {
-          SwitchCase: 1,
-        },
-      ],
+      // React + hooks rules
+      ...react.configs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
 
-      "linebreak-style": ["error", "unix"],
-      quotes: ["error", "double"],
-      semi: ["error", "always"],
+      // The new JSX transform doesn't require React in scope.
+      "react/react-in-jsx-scope": "off",
+
       "no-console": 0,
 
-      // Prettier integration - this runs Prettier through ESLint
+      "no-unused-vars": ["error", { ignoreRestSiblings: true }],
+
+      // Prettier integration - this runs Prettier through ESLint.
       "prettier/prettier": [
         "error",
         {
