@@ -3,7 +3,17 @@ import { capsulesCollection } from "../config/db.js";
 
 const toPlain = (doc) => {
   if (!doc) return null;
-  return { ...doc, id: doc._id.toString(), owner: doc.owner.toString() };
+  const locked = doc.openDate ? new Date(doc.openDate) > new Date() : false;
+  const plain = {
+    ...doc,
+    id: doc._id.toString(),
+    owner: doc.owner.toString(),
+    locked,
+  };
+  if (locked) {
+    delete plain.description;
+  }
+  return plain;
 };
 
 export const createCapsule = async (capsule, ownerId) => {
