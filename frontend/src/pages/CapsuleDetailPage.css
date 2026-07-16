@@ -23,13 +23,14 @@
 .capsule-hero-card,
 .capsule-contribution-card,
 .capsule-reveal-card {
-  border: none;
-  border-radius: 1rem;
-  box-shadow: 0 18px 40px rgba(20, 28, 40, 0.08);
+  border: 1px solid #ece5d6;
+  border-radius: 0.75rem;
+  box-shadow: 0 6px 18px rgba(20, 28, 40, 0.06);
 }
 
 .capsule-hero-card {
   background: linear-gradient(135deg, #fffaf3 0%, #f3f7ff 100%);
+  border-top: 3px solid #b0592f;
 }
 
 .capsule-hero-top {
@@ -83,6 +84,9 @@
 .capsule-reveal-card h2 {
   font-size: 1.15rem;
   margin-bottom: 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid #b0592f;
+  display: inline-block;
   color: #162033;
 }
 
@@ -94,6 +98,10 @@
   margin-bottom: 1rem;
 }
 
+.capsule-reveal-header h2 {
+  margin-bottom: 0;
+}
+
 .capsule-locked-state {
   min-height: 220px;
   display: flex;
@@ -102,15 +110,20 @@
   align-items: center;
   text-align: center;
   gap: 0.75rem;
-  padding: 1rem;
+  padding: 1.5rem 1rem;
   color: #556;
+  border: 1px dashed #d8ccb6;
+  border-radius: 8px;
+  background: #fbf7ef;
 }
 
 .capsule-locked-countdown {
   margin: 0;
-  font-size: 1.1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: #162033;
+  letter-spacing: 0.02em;
+  color: #b0592f;
 }
 
 .contribution-list {
