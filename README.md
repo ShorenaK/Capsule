@@ -23,11 +23,19 @@ CS5610 Web Development — Northeastern University: <https://johnguerra.co/class
 
 Capsule is a digital time capsule. A user creates a capsule with a title and an open date, invites friends or family with a share code, and everyone contributes messages, photos, predictions, and voice notes. Once sealed, nobody can view any contents until the open date arrives, making the reveal a shared moment for everyone who took part.
 
-## Screenshot
+## Screenshots
 
-![Capsule detail and reveal view](docs/screenshot.png)
+### Example of registration
+![Capsule Registration](docs/RegisterCapsule.png)
 
-> Add a screenshot at `docs/screenshot.png` before submitting.
+### Example of Capsule Login
+![Capsule Login](docs/LoginCapsule.png)
+
+### Example of Creating a new Capsule
+![Capsule Create view](docs/CapsuleDetails.png)
+
+### Example of viewing a Capsule that has been created
+![Capsule detail and reveal view](docs/CapsuleDetails.png)
 
 ## What It Does
 
