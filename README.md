@@ -17,7 +17,7 @@ CS5610 Web Development — Northeastern University: <https://johnguerra.co/class
 
 ## Project Objective
 
-Capsule is a digital time capsule. A user creates a capsule with a title and an open date, invites friends or family with a share code, and everyone contributes messages, photos, and predictions. Once sealed, nobody can view any contents until the open date arrives, making the reveal a shared moment for everyone who took part.
+Capsule is a digital time capsule. A user creates a capsule with a title and an open date, invites friends or family with a share code, and everyone contributes messages, photos, predictions, and voice notes. Once sealed, nobody can view any contents until the open date arrives, making the reveal a shared moment for everyone who took part.
 
 ## Screenshot
 
@@ -27,7 +27,7 @@ Capsule is a digital time capsule. A user creates a capsule with a title and an 
 
 ## What It Does
 
-Capsule lets authenticated users create locked time capsules with an open date. Contributors can add messages, predictions, and photos while the capsule is sealed, then view the reveal once the open date arrives.
+Capsule lets authenticated users create locked time capsules with an open date. Contributors can add messages, predictions, photos, and voice notes while the capsule is sealed. Once the open date arrives, the capsule unlocks and the contents can be opened as a step-by-step **reveal ceremony** — one contribution at a time — or viewed all at once. After a capsule opens, its owner can mark each **prediction** as having come true or not.
 
 ## Requirements
 
@@ -91,14 +91,43 @@ npm run seed
 
 This clears the `users`, `capsules`, and `contributions` collections first, then reseeds them. Every seeded user's password is `password123` (for example, log in as `demo1@capsule.test`).
 
+## Try It With Demo Data
+
+For a quick, predictable walkthrough of the reveal ceremony and prediction resolution, seed a single demo account with ready-made capsules:
+
+```bash
+npm run demo:data
+```
+
+This creates (and, on re-run, resets) one account:
+
+- **email:** `demo@capsule.test`
+- **password:** `password123`
+
+It owns two capsules: an already-open **"Senior Year 2024"** with messages, a photo, and three unresolved predictions to try the reveal ceremony and mark true/false, plus a still-locked **"New Year 2030 Goals"** to show the countdown and sealed state. This script only touches the demo account, so it is safe to run alongside `npm run seed` data.
+
+## Deployment
+
+The app is deployed on [Render](https://render.com) as a single web service that serves both the API and the built frontend:
+
+- **Build command:** `npm install && npm install --prefix frontend && npm run build --prefix frontend`
+- **Start command:** `node backend.js`
+- **Environment:** set `MONGODB_URI` (e.g. a MongoDB Atlas connection string), `MONGODB_DB`, `SESSION_SECRET`, and `NODE_ENV=production`. Render provides `PORT` automatically.
+
+Because Render serves the app over HTTPS behind a proxy, the server sets `trust proxy` so the `secure` session cookie is issued correctly in production.
+
 ## Available Scripts
 
 - `npm start` - runs the backend with watch mode
 - `npm run seed` - clears and repopulates the database with synthetic data
+- `npm run demo:data` - resets the `demo@capsule.test` account and its demo capsules
+- `npm run format` - formats the codebase with Prettier
+- `npm run lint:fix` - runs ESLint with autofix
 - `npm --prefix frontend run dev` - runs the Vite frontend
 - `npm --prefix frontend run build` - builds the frontend for production
 
 ## Notes
 
-- Log in or register before using the capsule list and reveal pages.
-- Photos are stored as uploaded data URLs in the current implementation, so this is best for small demo images.
+- Log in or register before using the capsule list and reveal pages. New passwords must be at least 8 characters, and registering logs you straight in.
+- Photos and voice notes are stored as base64 data URLs in the current implementation, so this is best for small demo files.
+- Only a capsule's owner can resolve its predictions, and only after the capsule has opened.

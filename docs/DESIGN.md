@@ -15,8 +15,8 @@ Class link: <https://johnguerra.co/classes/webDevelopment_online_summer_2/>
 Capsule is a full-stack web application designed as a digital time capsule.
 
 A user creates a capsule with a title and an open date, then invites friends or family via a share
-code. Invitees contribute messages, photos, and predictions to the capsule, but once locked, nobody
-can view any contents until the open date arrives.
+code. Invitees contribute messages, photos, predictions, and voice notes to the capsule, but once
+locked, nobody can view any contents until the open date arrives.
 
 The constraint is the product. Anyone can add to a capsule while it is sealed, but no one — not
 even the person who created it — can read what is inside until the open date passes. That
@@ -63,9 +63,11 @@ know what's locked and when each one opens.
 As a contributor, I want to add a written message to a capsule so my words are preserved until
 the open date. As a contributor, I want to upload a photo to a capsule so a visual memory is
 included in the reveal. As a contributor, I want to submit a prediction to a capsule so I can
-look back and see whether I was right. As a contributor, I want to view all messages, photos, and
-predictions in a capsule once its open date has passed so the reveal is a shared moment for
-everyone who took part.
+look back and see whether I was right. As a contributor, I want to record a voice note so a spoken
+memory is preserved for the reveal. As a contributor, I want to open a capsule's contents one at a
+time as a reveal ceremony once its open date has passed so the reveal is a shared moment for
+everyone who took part. As an owner, I want to mark each prediction as having come true or not once
+the capsule is open so we can see who called it.
 
 ---
 
@@ -99,8 +101,9 @@ sent to the client at all.
 
 ![Revealed capsule detail mockup](mockups/capsule-revealed.jpg)
 
-Once the open date passes, every message, photo, and prediction becomes visible at once.
-Contributors may edit or delete their own contributions.
+Once the open date passes, the capsule unlocks. Its contents can be opened as a step-by-step reveal
+ceremony — one message, photo, prediction, or voice note at a time — or viewed all at once. The
+owner can mark each prediction as having come true or not.
 
 ---
 
@@ -132,14 +135,21 @@ Two collections owned by James, one by Alexandra. MongoDB via the native driver.
 
 ### `contributions` _(Alexandra)_
 
-| Field       | Type     | Notes                                    |
-| ----------- | -------- | ---------------------------------------- |
-| `_id`       | ObjectId |                                          |
-| `capsuleId` | ObjectId | Parent; cascade-deleted with the capsule |
-| `author`    | ObjectId | Contributor                              |
-| `type`      | string   | `message` \| `photo` \| `prediction`     |
-| `body`      | string   | Text, or a base64 data URL for photos    |
-| `createdAt` | Date     |                                          |
+| Field          | Type          | Notes                                                    |
+| -------------- | ------------- | -------------------------------------------------------- |
+| `_id`          | ObjectId      |                                                          |
+| `capsuleId`    | ObjectId      | Parent; cascade-deleted with the capsule                 |
+| `authorId`     | ObjectId      | Contributor                                              |
+| `authorName`   | string        | Contributor's display name at time of writing            |
+| `type`         | string        | `message` \| `prediction` \| `photo` \| `voice`          |
+| `content`      | string        | Text body, or an optional caption for photo/voice        |
+| `photoDataUrl` | string\|null  | Base64 data URL for `photo` contributions                |
+| `photoName`    | string\|null  | Original file name for photos                            |
+| `audioDataUrl` | string\|null  | Base64 data URL for `voice` contributions                |
+| `audioName`    | string\|null  | File name for voice notes                                |
+| `outcome`      | boolean\|null | Predictions only; `null` until the owner resolves it     |
+| `createdAt`    | Date          |                                                          |
+| `updatedAt`    | Date          | Set when a contribution is edited or a prediction judged |
 
 **Lock state is derived, never stored.** A capsule is locked when `openDate > now`, computed on
 every read. Capsules open on time with no scheduled job, and the lock cannot drift out of sync
@@ -154,25 +164,27 @@ No axios, no Mongoose, no CORS — `fetch` on the client, the native driver on t
 Vite dev proxy that makes the frontend and API same-origin.
 
 **Authentication:** Passport with a local strategy over `express-session`. Passwords are bcrypt
-hashed. The session cookie is `httpOnly` with `sameSite: lax`, and `secure` in production.
+hashed. The session cookie is `httpOnly` with `sameSite: lax`, and `secure` in production; the app
+sets `trust proxy` so that secure cookie is issued correctly behind the host's HTTPS proxy.
 
 **API**
 
-| Method | Route                                             | Purpose                    |
-| ------ | ------------------------------------------------- | -------------------------- |
-| POST   | `/api/auth/register`                              | Create account             |
-| POST   | `/api/auth/login`                                 | Log in                     |
-| POST   | `/api/auth/logout`                                | Log out                    |
-| GET    | `/api/auth/user`                                  | Current session user       |
-| GET    | `/api/capsules`                                   | Capsules owned or joined   |
-| POST   | `/api/capsules`                                   | Create                     |
-| GET    | `/api/capsules/:id`                               | One capsule                |
-| PUT    | `/api/capsules/:id`                               | Update _(owner)_           |
-| DELETE | `/api/capsules/:id`                               | Delete + cascade _(owner)_ |
-| POST   | `/api/capsules/join`                              | Join by share code         |
-| POST   | `/api/capsules/:id/contributions`                 | Add                        |
-| PUT    | `/api/capsules/:id/contributions/:contributionId` | Edit _(author)_            |
-| DELETE | `/api/capsules/:id/contributions/:contributionId` | Delete _(author)_          |
+| Method | Route                                                     | Purpose                                  |
+| ------ | --------------------------------------------------------- | ---------------------------------------- |
+| POST   | `/api/auth/register`                                      | Create account                           |
+| POST   | `/api/auth/login`                                         | Log in                                   |
+| POST   | `/api/auth/logout`                                        | Log out                                  |
+| GET    | `/api/auth/user`                                          | Current session user                     |
+| GET    | `/api/capsules`                                           | Capsules owned or joined                 |
+| POST   | `/api/capsules`                                           | Create                                   |
+| GET    | `/api/capsules/:id`                                       | One capsule                              |
+| PUT    | `/api/capsules/:id`                                       | Update _(owner)_                         |
+| DELETE | `/api/capsules/:id`                                       | Delete + cascade _(owner)_               |
+| POST   | `/api/capsules/join`                                      | Join by share code                       |
+| POST   | `/api/capsules/:id/contributions`                         | Add                                      |
+| PUT    | `/api/capsules/:id/contributions/:contributionId`         | Edit _(author)_                          |
+| DELETE | `/api/capsules/:id/contributions/:contributionId`         | Delete _(author)_                        |
+| PATCH  | `/api/capsules/:id/contributions/:contributionId/outcome` | Resolve prediction _(owner, after open)_ |
 
 **Authorization.** Every capsule route requires a session. Access requires ownership or
 membership; the list query and the single-capsule check apply the same rule. Sealing is enforced
@@ -187,6 +199,7 @@ capsule creation with title and open date; the share-code join flow; the capsule
 status and countdown. Owns the `users` and `capsules` collections full stack (React + Express +
 Mongo), with full CRUD on `capsules`.
 
-**Alexandra Descoteaux — Contributions and Reveal.** CRUD for message, photo, and prediction
-contributions, and the reveal view that returns contents only after the open date. Owns the
-`contributions` collection full stack (React + Express + Mongo).
+**Alexandra Descoteaux — Contributions and Reveal.** CRUD for message, photo, prediction, and
+voice-note contributions; the reveal view that returns contents only after the open date, opened
+as a step-by-step reveal ceremony; and owner resolution of predictions as true or false once a
+capsule is open. Owns the `contributions` collection full stack (React + Express + Mongo).
