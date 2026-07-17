@@ -74,6 +74,8 @@ export default function CapsuleDetailPage() {
   const [editOpenDate, setEditOpenDate] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [revealMode, setRevealMode] = useState("intro");
+  const [ceremonyIndex, setCeremonyIndex] = useState(0);
 
   const applyData = (data) => {
     setCapsule(data.capsule);
@@ -267,6 +269,31 @@ export default function CapsuleDetailPage() {
       await reloadCapsule();
     } catch (deleteError) {
       setError(deleteError.message);
+    }
+  };
+
+  const handleSetOutcome = async (contribution, outcome) => {
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `/api/capsules/${id}/contributions/${contribution.id}/outcome`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ outcome })
+        }
+      );
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to update prediction");
+      }
+
+      await reloadCapsule();
+    } catch (outcomeError) {
+      setError(outcomeError.message);
     }
   };
 
@@ -641,14 +668,92 @@ export default function CapsuleDetailPage() {
 
                       {revealState?.isOpen ? (
                         contributions.length > 0 ? (
-                          <div className="contribution-list">
-                            {contributions.map((contribution) => (
-                              <ContributionCard
-                                key={contribution.id}
-                                contribution={contribution}
-                              />
-                            ))}
-                          </div>
+                          revealMode === "intro" ? (
+                            <div className="reveal-intro">
+                              <p className="reveal-intro-lead">
+                                {contributions.length}{" "}
+                                {contributions.length === 1
+                                  ? "memory is"
+                                  : "memories are"}{" "}
+                                sealed inside. Open them one at a time?
+                              </p>
+                              <div className="reveal-intro-actions">
+                                <Button
+                                  onClick={() => {
+                                    setCeremonyIndex(0);
+                                    setRevealMode("ceremony");
+                                  }}
+                                >
+                                  Begin the reveal
+                                </Button>
+                                <Button
+                                  variant="link"
+                                  onClick={() => setRevealMode("all")}
+                                >
+                                  See them all at once
+                                </Button>
+                              </div>
+                            </div>
+                          ) : revealMode === "ceremony" &&
+                            ceremonyIndex < contributions.length ? (
+                            <div className="reveal-ceremony">
+                              <div className="reveal-progress">
+                                {ceremonyIndex + 1} of {contributions.length}
+                              </div>
+                              <div
+                                className="reveal-stage"
+                                key={contributions[ceremonyIndex].id}
+                              >
+                                <ContributionCard
+                                  contribution={contributions[ceremonyIndex]}
+                                  canResolve={isOwner}
+                                  onSetOutcome={handleSetOutcome}
+                                />
+                              </div>
+                              <div className="reveal-ceremony-actions">
+                                <Button
+                                  variant="outline-secondary"
+                                  disabled={ceremonyIndex === 0}
+                                  onClick={() =>
+                                    setCeremonyIndex((index) =>
+                                      Math.max(index - 1, 0)
+                                    )
+                                  }
+                                >
+                                  Back
+                                </Button>
+                                <Button
+                                  onClick={() =>
+                                    setCeremonyIndex((index) => index + 1)
+                                  }
+                                >
+                                  {ceremonyIndex + 1 === contributions.length
+                                    ? "Finish"
+                                    : "Next"}
+                                </Button>
+                              </div>
+                            </div>
+                          ) : revealMode === "ceremony" ? (
+                            <div className="reveal-complete">
+                              <p className="reveal-complete-lead">
+                                That&apos;s everything. 🎉
+                              </p>
+                              <Button onClick={() => setRevealMode("all")}>
+                                View all contributions
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="contribution-list">
+                              {contributions.map((contribution) => (
+                                <ContributionCard
+                                  key={contribution.id}
+                                  contribution={contribution}
+                                  canResolve={isOwner}
+                                  onSetOutcome={handleSetOutcome}
+                                />
+                              ))}
+                            </div>
+                          )
                         ) : (
                           <Alert variant="light" className="mb-0">
                             No one has added a contribution yet.

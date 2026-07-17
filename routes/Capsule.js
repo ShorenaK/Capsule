@@ -18,6 +18,7 @@ import {
   findContributionsByAuthor,
   findContributionsByCapsuleId,
   isContributionType,
+  setPredictionOutcome,
   updateContribution
 } from "../models/Contribution.js";
 
@@ -299,6 +300,70 @@ router.delete(
       await deleteContribution(req.params.contributionId);
 
       res.status(204).end();
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.patch(
+  "/capsules/:id/contributions/:contributionId/outcome",
+  isAuthenticated,
+  async (req, res, next) => {
+    try {
+      const capsule = await findCapsuleById(req.params.id, req.user.id);
+
+      if (!capsule) {
+        return res.status(404).json({ error: "Capsule not found" });
+      }
+
+      if (!canAccessCapsule(capsule, req.user)) {
+        return res
+          .status(403)
+          .json({ error: "You do not have access to this capsule" });
+      }
+
+      // A prediction can only be judged once its capsule has opened and the
+      // outcome is actually known.
+      if (!getCapsuleOpenState(capsule).isOpen) {
+        return res.status(403).json({
+          error: "Predictions can only be resolved after the capsule opens"
+        });
+      }
+
+      if (capsule.owner !== req.user.id) {
+        return res
+          .status(403)
+          .json({ error: "Only the owner can resolve predictions" });
+      }
+
+      const { outcome } = req.body;
+      if (![true, false, null].includes(outcome)) {
+        return res
+          .status(400)
+          .json({ error: "Outcome must be true, false, or null" });
+      }
+
+      const contribution = await findContributionById(
+        req.params.contributionId
+      );
+
+      if (!contribution || contribution.capsuleId !== capsule.id) {
+        return res.status(404).json({ error: "Contribution not found" });
+      }
+
+      if (contribution.type !== "prediction") {
+        return res
+          .status(400)
+          .json({ error: "Only predictions can be resolved" });
+      }
+
+      const updated = await setPredictionOutcome(
+        req.params.contributionId,
+        outcome
+      );
+
+      res.json(updated);
     } catch (error) {
       next(error);
     }

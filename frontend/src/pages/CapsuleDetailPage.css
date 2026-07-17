@@ -167,3 +167,55 @@
   color: #6c757d;
   font-size: 0.875rem;
 }
+
+.reveal-intro,
+.reveal-complete {
+  text-align: center;
+  padding: 1.5rem 0.5rem;
+}
+
+.reveal-intro-lead,
+.reveal-complete-lead {
+  font-size: 1.05rem;
+  color: #243044;
+  margin-bottom: 1rem;
+}
+
+.reveal-intro-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.reveal-progress {
+  text-align: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.82rem;
+  color: #9a8f7d;
+  margin-bottom: 0.85rem;
+}
+
+.reveal-ceremony-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-top: 1.15rem;
+}
+
+/* Each revealed card remounts (keyed by id), replaying this fade so every
+   step feels like opening something new. */
+.reveal-stage {
+  animation: reveal-fade-in 0.45s ease-out;
+}
+
+@keyframes reveal-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

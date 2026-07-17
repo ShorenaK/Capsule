@@ -56,3 +56,19 @@
   gap: 0.65rem;
   margin-top: 1rem;
 }
+
+.prediction-outcome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px dashed #e6ddcd;
+}
+
+.prediction-outcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

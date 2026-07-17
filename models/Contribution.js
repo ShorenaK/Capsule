@@ -46,6 +46,12 @@ export const createContribution = async ({
     createdAt: new Date()
   };
 
+  // Predictions can be resolved as correct/incorrect once the capsule opens;
+  // null means it has not been judged yet.
+  if (type === "prediction") {
+    doc.outcome = null;
+  }
+
   const result = await contributionsCollection().insertOne(doc);
   return toPlain({ ...doc, _id: result.insertedId });
 };
@@ -119,6 +125,19 @@ export const updateContribution = async (
   await contributionsCollection().updateOne(
     { _id: new ObjectId(id) },
     { $set: updates }
+  );
+
+  return findContributionById(id);
+};
+
+export const setPredictionOutcome = async (id, outcome) => {
+  if (!ObjectId.isValid(id)) {
+    throw new Error("Invalid contribution id");
+  }
+
+  await contributionsCollection().updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { outcome, updatedAt: new Date() } }
   );
 
   return findContributionById(id);

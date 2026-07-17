@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node --watch backend.js",
     "seed": "node scripts/seed.js",
+    "demo:data": "node scripts/demo-data.js",
     "format": "prettier --write .",
     "lint:fix": "eslint . --fix",
     "lint": "eslint ."

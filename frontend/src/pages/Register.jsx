@@ -34,7 +34,7 @@ export default function Register() {
         return;
       }
 
-      navigate("/login");
+      navigate("/");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {

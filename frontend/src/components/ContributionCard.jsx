@@ -17,9 +17,13 @@ export default function ContributionCard({
   contribution,
   sealed = false,
   showActions = false,
+  canResolve = false,
   onEdit = undefined,
-  onDelete = undefined
+  onDelete = undefined,
+  onSetOutcome = undefined
 }) {
+  const isPrediction = contribution.type === "prediction";
+  const { outcome } = contribution;
   return (
     <Card className="contribution-card">
       <Card.Body>
@@ -58,6 +62,50 @@ export default function ContributionCard({
           <p className="contribution-text">{contribution.content}</p>
         )}
 
+        {!sealed && isPrediction && (
+          <div className="prediction-outcome">
+            {outcome === true ? (
+              <Badge bg="success">Came true</Badge>
+            ) : outcome === false ? (
+              <Badge bg="danger">Didn&apos;t happen</Badge>
+            ) : (
+              <Badge bg="light" text="dark">
+                Not yet resolved
+              </Badge>
+            )}
+
+            {canResolve && (
+              <div className="prediction-outcome-actions">
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  onClick={() => onSetOutcome?.(contribution, true)}
+                  disabled={outcome === true}
+                >
+                  Came true
+                </Button>
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={() => onSetOutcome?.(contribution, false)}
+                  disabled={outcome === false}
+                >
+                  Didn&apos;t happen
+                </Button>
+                {(outcome === true || outcome === false) && (
+                  <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    onClick={() => onSetOutcome?.(contribution, null)}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {showActions && (
           <div className="contribution-actions">
             <Button
@@ -92,10 +140,13 @@ ContributionCard.propTypes = {
     photoDataUrl: PropTypes.string,
     photoName: PropTypes.string,
     audioDataUrl: PropTypes.string,
-    audioName: PropTypes.string
+    audioName: PropTypes.string,
+    outcome: PropTypes.bool
   }).isRequired,
   sealed: PropTypes.bool,
   showActions: PropTypes.bool,
+  canResolve: PropTypes.bool,
   onEdit: PropTypes.func,
-  onDelete: PropTypes.func
+  onDelete: PropTypes.func,
+  onSetOutcome: PropTypes.func
 };

@@ -7,23 +7,47 @@ import { findUserByEmail, createUser } from "../models/User.js";
 
 const router = express.Router();
 
-router.post("/register", async (req, res) => {
+router.post("/register", async (req, res, next) => {
   const { email, password, name } = req.body;
 
   if (!email || !password || !name) {
     return res.status(400).json({ message: "All fields are required" });
   }
 
-  const existingUser = await findUserByEmail(email);
-  if (existingUser) {
-    return res.status(400).json({ message: "User already exists" });
+  if (password.length < 8) {
+    return res
+      .status(400)
+      .json({ message: "Password must be at least 8 characters" });
   }
 
-  const passwordHash = await bcrypt.hash(password, 10);
-  const user = await createUser({ email, passwordHash, name });
-  delete user.passwordHash; // Remove password hash from the response
+  try {
+    const existingUser = await findUserByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
 
-  res.status(201).json({ message: "User created successfully", user });
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = await createUser({ email, passwordHash, name });
+    delete user.passwordHash; // Remove password hash from the response
+
+    // Log the new user straight in so registration flows into the app instead
+    // of bouncing them back to a separate login step.
+    req.login(user, (loginErr) => {
+      if (loginErr) {
+        return next(loginErr);
+      }
+      return res
+        .status(201)
+        .json({ message: "User created successfully", user });
+    });
+  } catch (err) {
+    // A concurrent signup can slip past the findUserByEmail check and hit the
+    // unique email index; surface that as a clean 400 instead of a 500.
+    if (err?.code === 11000) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+    return next(err);
+  }
 });
 
 router.get("/user", isAuthenticated, (req, res) => {
