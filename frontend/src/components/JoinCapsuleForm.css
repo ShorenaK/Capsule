@@ -1,4 +1,4 @@
-.capsule-form {
+.join-capsule-form {
   background: #ffffff;
   border: 1px solid #ece5d6;
   border-radius: 0.75rem;
@@ -7,7 +7,7 @@
   margin-top: 1rem;
 }
 
-.capsule-form h3 {
+.join-capsule-form h3 {
   font-size: 1.15rem;
   font-weight: 600;
   color: #162033;
@@ -17,10 +17,22 @@
   display: inline-block;
 }
 
-.capsule-form .form-floating {
+.join-capsule-form .form-floating {
   margin-bottom: 1rem;
 }
 
-.capsule-form .btn {
+.join-capsule-form .btn {
   width: 100%;
+}
+
+.join-capsule-error {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #c0392b;
+}
+
+.join-capsule-status {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #2e7d32;
 }

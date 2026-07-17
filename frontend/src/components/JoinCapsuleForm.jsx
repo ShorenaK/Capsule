@@ -5,7 +5,7 @@ import FloatingLabel from "react-bootstrap/FloatingLabel";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 
-import "./CapsuleForm.css";
+import "./JoinCapsuleForm.css";
 
 export default function JoinCapsuleForm({ onJoin }) {
   const [code, setCode] = useState("");
@@ -27,7 +27,7 @@ export default function JoinCapsuleForm({ onJoin }) {
   };
 
   return (
-    <Form className="capsule-form" onSubmit={handleSubmit}>
+    <Form className="join-capsule-form" onSubmit={handleSubmit}>
       <h3>Join a capsule</h3>
       <FloatingLabel controlId="shareCode" label="Share code">
         <Form.Control
