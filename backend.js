@@ -11,6 +11,11 @@ import capsuleRoutes from "./routes/Capsule.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Render (and most hosts) terminate HTTPS at a proxy in front of the app.
+// Trusting it lets Express recognize the request as secure so the session
+// cookie (secure: true in production) is actually set.
+app.set("trust proxy", 1);
+
 // Photos and voice notes are sent as base64 data URLs, which are far larger
 // than the 100kb express default, so raise the request body limit.
 app.use(express.json({ limit: "15mb" }));
