@@ -12,11 +12,16 @@ Class link: <https://johnguerra.co/classes/webDevelopment_online_summer_2/>
 
 ## 1. Project Description
 
-Capsule is a full-stack web application designed as a digital time capsule.
+Capsule is a full-stack web application. It allows users to create capsules that can be shared with friends and family, where they can contribute messages, photos, predictions, and voice notes. The unique feature of Capsule is that once a capsule is locked, its contents remain hidden until the specified open date, creating a shared moment of anticipation and surprise.
+
+Login and registration auth are handled via Passport with a local strategy, ensuring that users' capsules and contributions remain private. We store usernames, emails, and hashed passwords in a `users` collection. Capsules are stored in a `capsules` collection. Each capsule has an owner and a list of members who have joined via the share code. Each contribution is associated with a capsule and an author.
+
+The backend is built with Node, Express, and MongoDB, while the frontend is developed using React and Vite. The application is deployed to Render, with a MongoDB Atlas database.
+
+The frontend is built with React and Vite, with no additional libraries for HTTP requests or state management.
 
 A user creates a capsule with a title and an open date, then invites friends or family via a share
-code. Invitees contribute messages, photos, predictions, and voice notes to the capsule, but once
-locked, nobody can view any contents until the open date arrives.
+code. Invitees contribute messages, photos, predictions, and voice notes to the capsule, but once.
 
 The constraint is the product. Anyone can add to a capsule while it is sealed, but no one — not
 even the person who created it — can read what is inside until the open date passes. That

@@ -26,16 +26,16 @@ Capsule is a digital time capsule. A user creates a capsule with a title and an 
 ## Screenshots
 
 ### Example of registration
-![Capsule Registration](docs/RegisterCapsule.png)
+![Capsule Registration](docs/pics/RegisterCapsule.png)
 
 ### Example of Capsule Login
-![Capsule Login](docs/LoginCapsule.png)
+![Capsule Login](docs/pics/LoginCapsule.png)
 
 ### Example of Creating a new Capsule
-![Capsule Create view](docs/CapsuleDetails.png)
+![Capsule Create view](docs/pics/CapsuleDetails.png)
 
 ### Example of viewing a Capsule that has been created
-![Capsule detail and reveal view](docs/CapsuleDetails.png)
+![Capsule detail and reveal view](docs/pics/CapsuleDetails.png)
 
 ## What It Does
 
