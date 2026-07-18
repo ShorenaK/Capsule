@@ -10,6 +10,8 @@ Deployed on Render: <https://capsule-s77x.onrender.com>
 
 <https://docs.google.com/presentation/d/1ecZQcJ44aZm_QCXuPGLc4gVp8-woWTznhn5odgEosRg/edit?usp=sharing>
 
+[Demo Video](https://www.youtube.com/watch?v=w9BYKyD3LWM)
+
 ## Authors
 
 - Alexandra (Ally) Descoteaux — Contributions and Reveal (contributions collection, full CRUD, reveal view)
