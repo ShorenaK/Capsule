@@ -8,7 +8,7 @@ import Countdown from "./Countdown.jsx";
 import "./Capsule.css";
 
 export default function Capsule({ capsule }) {
-  const members = capsule.members ?? [];
+  const members = capsule.memberNames ?? [];
   const isLocked = capsule.locked ?? false;
 
   let openLabel = null;
@@ -76,7 +76,7 @@ Capsule.propTypes = {
     id: PropTypes.string.isRequired,
     name: PropTypes.string,
     description: PropTypes.string,
-    members: PropTypes.arrayOf(PropTypes.string),
+    memberNames: PropTypes.arrayOf(PropTypes.string),
     openDate: PropTypes.string,
     locked: PropTypes.bool,
     shareCode: PropTypes.string

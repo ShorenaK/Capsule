@@ -1,8 +1,29 @@
 import { ObjectId } from "mongodb";
-import { capsulesCollection } from "../config/db.js";
+import { capsulesCollection, usersCollection } from "../config/db.js";
 import { generateShareCode, normalizeShareCode } from "./shareCode.js";
 
-const toPlain = (doc, viewerId) => {
+// Members are stored as user ids; resolve them to display names for the client.
+// Anything that isn't a known user id (e.g. a legacy email) is passed through.
+const resolveMemberNames = async (members) => {
+  const list = members || [];
+  const objectIds = list
+    .filter((member) => ObjectId.isValid(member))
+    .map((member) => new ObjectId(member));
+
+  const nameById = new Map();
+  if (objectIds.length > 0) {
+    const users = await usersCollection()
+      .find({ _id: { $in: objectIds } })
+      .toArray();
+    for (const user of users) {
+      nameById.set(user._id.toString(), user.name);
+    }
+  }
+
+  return list.map((member) => nameById.get(member) || member);
+};
+
+const toPlain = async (doc, viewerId) => {
   if (!doc) return null;
   const owner = doc.owner.toString();
   const locked = doc.openDate ? new Date(doc.openDate) > new Date() : false;
@@ -10,7 +31,8 @@ const toPlain = (doc, viewerId) => {
     ...doc,
     id: doc._id.toString(),
     owner,
-    locked
+    locked,
+    memberNames: await resolveMemberNames(doc.members)
   };
   if (locked) {
     delete plain.description;
@@ -44,7 +66,7 @@ export const findCapsules = async (viewerId, query) => {
     filter.name = { $regex: query, $options: "i" };
   }
   const capsules = await capsulesCollection().find(filter).toArray();
-  return capsules.map((doc) => toPlain(doc, viewerId));
+  return Promise.all(capsules.map((doc) => toPlain(doc, viewerId)));
 };
 
 export const findCapsuleById = async (id, viewerId) => {

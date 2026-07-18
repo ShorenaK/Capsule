@@ -31,6 +31,58 @@ const canAccessCapsule = (capsule, user) => {
   return members.includes(user.id) || members.includes(user.email);
 };
 
+// Stored media is a base64 data URL like "data:image/png;base64,iVBOR…".
+// Split it back into a content type and a decoded buffer for streaming.
+const parseDataUrl = (dataUrl) => {
+  const match = /^data:([^;,]+)(?:;[^,]*)?,(.*)$/s.exec(dataUrl || "");
+  if (!match) return null;
+  return { contentType: match[1], buffer: Buffer.from(match[2], "base64") };
+};
+
+// Streams a photo/voice blob for a contribution. Access mirrors the reveal
+// rules: the viewer must belong to the capsule, and the media is only served
+// once the capsule is open or to the author of the contribution.
+const sendContributionMedia = async (req, res, next, kind) => {
+  try {
+    const capsule = await findCapsuleById(req.params.id, req.user.id);
+
+    if (!capsule) {
+      return res.status(404).json({ error: "Capsule not found" });
+    }
+
+    if (!canAccessCapsule(capsule, req.user)) {
+      return res
+        .status(403)
+        .json({ error: "You do not have access to this capsule" });
+    }
+
+    const contribution = await findContributionById(req.params.contributionId);
+
+    if (!contribution || contribution.capsuleId !== capsule.id) {
+      return res.status(404).json({ error: "Contribution not found" });
+    }
+
+    const isAuthor = contribution.authorId === req.user.id;
+    if (!getCapsuleOpenState(capsule).isOpen && !isAuthor) {
+      return res.status(403).json({ error: "This capsule is still sealed" });
+    }
+
+    const field = kind === "photo" ? "photoDataUrl" : "audioDataUrl";
+    const media = parseDataUrl(contribution[field]);
+    if (!media) {
+      return res.status(404).json({ error: "Media not found" });
+    }
+
+    res.setHeader("Content-Type", media.contentType);
+    // The media never changes once it can be viewed (open capsules are locked
+    // from edits), so let the browser cache it and skip re-downloading.
+    res.setHeader("Cache-Control", "private, max-age=86400");
+    res.send(media.buffer);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getCapsuleOpenState = (capsule) => {
   const openDate = new Date(capsule.openDate);
   const now = new Date();
@@ -368,6 +420,18 @@ router.patch(
       next(error);
     }
   }
+);
+
+router.get(
+  "/capsules/:id/contributions/:contributionId/photo",
+  isAuthenticated,
+  (req, res, next) => sendContributionMedia(req, res, next, "photo")
+);
+
+router.get(
+  "/capsules/:id/contributions/:contributionId/audio",
+  isAuthenticated,
+  (req, res, next) => sendContributionMedia(req, res, next, "audio")
 );
 
 router.post("/capsules", isAuthenticated, async (req, res, next) => {

@@ -24,6 +24,7 @@ export default function ContributionCard({
 }) {
   const isPrediction = contribution.type === "prediction";
   const { outcome } = contribution;
+  const mediaBase = `/api/capsules/${contribution.capsuleId}/contributions/${contribution.id}`;
   return (
     <Card className="contribution-card">
       <Card.Body>
@@ -44,8 +45,9 @@ export default function ContributionCard({
         ) : contribution.type === "photo" ? (
           <div className="contribution-photo">
             <img
-              src={contribution.photoDataUrl}
+              src={`${mediaBase}/photo`}
               alt={contribution.photoName || "Capsule contribution"}
+              loading="lazy"
             />
             {contribution.content && (
               <p className="contribution-text">{contribution.content}</p>
@@ -53,7 +55,7 @@ export default function ContributionCard({
           </div>
         ) : contribution.type === "voice" ? (
           <div className="contribution-voice">
-            <audio src={contribution.audioDataUrl} controls />
+            <audio src={`${mediaBase}/audio`} controls preload="none" />
             {contribution.content && (
               <p className="contribution-text">{contribution.content}</p>
             )}
@@ -132,14 +134,13 @@ export default function ContributionCard({
 ContributionCard.propTypes = {
   contribution: PropTypes.shape({
     id: PropTypes.string.isRequired,
+    capsuleId: PropTypes.string.isRequired,
     type: PropTypes.oneOf(["message", "prediction", "photo", "voice"])
       .isRequired,
     authorName: PropTypes.string.isRequired,
     createdAt: PropTypes.string.isRequired,
     content: PropTypes.string,
-    photoDataUrl: PropTypes.string,
     photoName: PropTypes.string,
-    audioDataUrl: PropTypes.string,
     audioName: PropTypes.string,
     outcome: PropTypes.bool
   }).isRequired,

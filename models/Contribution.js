@@ -4,6 +4,11 @@ import { contributionsCollection } from "../config/db.js";
 
 const allowedTypes = new Set(["message", "prediction", "photo", "voice"]);
 
+// Photos and voice notes are stored as base64 data URLs, which are huge. List
+// endpoints omit them and let the client stream each blob from its own cacheable
+// media route instead, so the capsule payload stays small.
+const WITHOUT_MEDIA = { photoDataUrl: 0, audioDataUrl: 0 };
+
 const toPlain = (doc) => {
   if (!doc) return null;
   return {
@@ -63,6 +68,7 @@ export const findContributionsByCapsuleId = async (capsuleId) => {
 
   const contributions = await contributionsCollection()
     .find({ capsuleId: new ObjectId(capsuleId) })
+    .project(WITHOUT_MEDIA)
     .sort({ createdAt: 1 })
     .toArray();
 
@@ -79,6 +85,7 @@ export const findContributionsByAuthor = async (capsuleId, authorId) => {
       capsuleId: new ObjectId(capsuleId),
       authorId: new ObjectId(authorId)
     })
+    .project(WITHOUT_MEDIA)
     .sort({ createdAt: 1 })
     .toArray();
 
